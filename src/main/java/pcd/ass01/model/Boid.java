@@ -1,5 +1,6 @@
-package pcd.ass01;
+package pcd.ass01.model;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,12 +8,19 @@ public class Boid {
 
     private P2d pos;
     private V2d vel;
+    private Color color;
 
     public Boid(P2d pos, V2d vel) {
     	this.pos = pos;
     	this.vel = vel;
     }
-    
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public Color getColor() {return color;}
+
     public P2d getPos() {
     	return pos;
     }
@@ -94,7 +102,7 @@ public class Boid {
     
     private List<Boid> getNearbyBoids(BoidsModel model) {
     	var list = new ArrayList<Boid>();
-        for (Boid other : model.getBoids()) {
+        for (Boid other : List.copyOf(model.getBoids())) {
         	if (other != this) {
         		P2d otherPos = other.getPos();
         		double distance = pos.distance(otherPos);

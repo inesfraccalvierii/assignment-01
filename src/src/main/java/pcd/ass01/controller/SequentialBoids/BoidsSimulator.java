@@ -1,4 +1,8 @@
-package pcd.ass01;
+package pcd.ass01.controller.SequentialBoids;
+
+import pcd.ass01.model.Boid;
+import pcd.ass01.model.BoidsModel;
+import pcd.ass01.view.BoidsView;
 
 import java.util.Optional;
 
@@ -7,9 +11,11 @@ public class BoidsSimulator {
     private BoidsModel model;
     private Optional<BoidsView> view;
     
-    private static final int FRAMERATE = 25;
+    private static final int FRAMERATE = 60;
     private int framerate;
-    
+
+    private boolean stop = false;
+
     public BoidsSimulator(BoidsModel model) {
         this.model = model;
         view = Optional.empty();
@@ -18,9 +24,12 @@ public class BoidsSimulator {
     public void attachView(BoidsView view) {
     	this.view = Optional.of(view);
     }
-      
+
+    public void startSimulation() {
+        runSimulation();
+    }
     public void runSimulation() {
-    	while (true) {
+    	while (!stop) {
             var t0 = System.currentTimeMillis();
     		var boids = model.getBoids();
     		/*
@@ -36,7 +45,7 @@ public class BoidsSimulator {
                 boid.updateVelocity(model);
             }
 
-    		/* 
+    		/* z
     		 * ..then update positions
     		 */
     		for (Boid boid : boids) {
@@ -61,5 +70,22 @@ public class BoidsSimulator {
     		}
             
     	}
+    }
+
+    public void stopSimulation() {
+        this.stop = true;
+        model.deleteBoids();
+    }
+
+    public void pauseSimulation() {
+        this.stop = true;
+    }
+
+    public void resumeSimulation() {
+        this.stop = false;
+    }
+
+    public void setNumberOfBoids(int nBoids){
+        model.createBoids(nBoids);
     }
 }

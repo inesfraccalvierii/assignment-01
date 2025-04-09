@@ -1,11 +1,14 @@
-package pcd.ass01;
+package pcd.ass01.view;
+
+import pcd.ass01.model.Boid;
+import pcd.ass01.model.BoidsModel;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class BoidsPanel extends JPanel {
 
-	private BoidsView view; 
+	private BoidsView view;
 	private BoidsModel model;
     private int framerate;
 
@@ -32,8 +35,9 @@ public class BoidsPanel extends JPanel {
 
         var boids = model.getBoids();
 
-        g.setColor(Color.BLUE);
+
         for (Boid boid : boids) {
+            g.setColor(boid.getColor());
         	var x = boid.getPos().x();
         	var y = boid.getPos().y();
         	int px = (int)(w/2 + x*xScale);
@@ -42,7 +46,6 @@ public class BoidsPanel extends JPanel {
         }
         
         g.setColor(Color.BLACK);
-        g.drawString("Num. Boids: " + boids.size(), 10, 25);
-        g.drawString("Framerate: " + framerate, 10, 40);
+        g.drawString("Framerate: " + framerate,  10, 25);
    }
 }
