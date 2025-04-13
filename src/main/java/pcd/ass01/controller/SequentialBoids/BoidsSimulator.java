@@ -20,6 +20,9 @@ public class BoidsSimulator {
         view = Optional.empty();
     }
 
+    private long totalSimulationTime = 0;
+    private int totalFrames = 0;
+
     public void attachView(BoidsView view) {
     	this.view = Optional.of(view);
     }
@@ -56,6 +59,9 @@ public class BoidsSimulator {
             	view.get().update(framerate);
             	var t1 = System.currentTimeMillis();
                 var dtElapsed = t1 - t0;
+                totalSimulationTime += dtElapsed;
+                totalFrames++;
+
                 var framratePeriod = 1000/FRAMERATE;
                 
                 if (dtElapsed < framratePeriod) {		
@@ -67,6 +73,15 @@ public class BoidsSimulator {
                 	framerate = (int) (1000/dtElapsed);
                 }
     		}
+
+            if (totalFrames > 0) {
+                double avgFrameTime = (double) totalSimulationTime / totalFrames;
+                System.out.println("Simulation ended.");
+                System.out.println("Total frames: " + totalFrames);
+                System.out.println("Average frame time: " + avgFrameTime + " ms");
+                System.out.println("Average FPS: " + (1000.0 / avgFrameTime));
+            }
+
             while (!run){
 
             }

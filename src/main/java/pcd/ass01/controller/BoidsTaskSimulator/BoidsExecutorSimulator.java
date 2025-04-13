@@ -25,6 +25,8 @@ public class BoidsExecutorSimulator extends BoidsSimulator {
     private volatile boolean stop = false;
 
     private final Random random = new Random();
+    private long totalSimulationTime = 0;
+    private int totalFrames = 0;
 
     public BoidsExecutorSimulator(BoidsModel model) {
         super(model);
@@ -113,6 +115,10 @@ public class BoidsExecutorSimulator extends BoidsSimulator {
             view.ifPresent(v -> v.update(framerate));
 
             long dtElapsed = System.currentTimeMillis() - t0;
+
+            totalSimulationTime += dtElapsed;
+            totalFrames++;
+
             long frameRatePeriod = 1000 / FRAMERATE;
 
             if (dtElapsed < frameRatePeriod) {
@@ -125,6 +131,14 @@ public class BoidsExecutorSimulator extends BoidsSimulator {
                 framerate = FRAMERATE;
             } else {
                 framerate = (int) (1000 / dtElapsed);
+            }
+
+            if (totalFrames > 0) {
+                double avgFrameTime = (double) totalSimulationTime / totalFrames;
+                System.out.println("Simulation ended.");
+                System.out.println("Total frames: " + totalFrames);
+                System.out.println("Average frame time: " + avgFrameTime + " ms");
+                System.out.println("Average FPS: " + (1000.0 / avgFrameTime));
             }
         }
     }

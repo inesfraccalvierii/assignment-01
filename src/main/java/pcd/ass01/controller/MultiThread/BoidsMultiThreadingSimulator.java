@@ -25,6 +25,8 @@ public class BoidsMultiThreadingSimulator extends BoidsSimulator {
     private volatile boolean running = true;
     private volatile boolean stop = false;
 
+    private long totalSimulationTime = 0;
+    private int totalFrames = 0;
 
     private final Random random = new Random();
 
@@ -71,7 +73,7 @@ public class BoidsMultiThreadingSimulator extends BoidsSimulator {
                         Thread.currentThread().interrupt();
                         return;
                     }
-                    for (Boid boid : new ArrayList<>(batch)) {
+                    for (Boid boid : List.copyOf(batch)) {
                         boid.updatePos(model);
                     }
 
@@ -112,6 +114,10 @@ public class BoidsMultiThreadingSimulator extends BoidsSimulator {
                 view.get().update(framerate);
                 var t1 = System.currentTimeMillis();
                 var dtElapsed = t1 - t0;
+
+                totalSimulationTime += dtElapsed;
+                totalFrames++;
+
                 var frameRatePeriod = 1000 / FRAMERATE;
 
                 if (dtElapsed < frameRatePeriod) {
@@ -125,6 +131,14 @@ public class BoidsMultiThreadingSimulator extends BoidsSimulator {
                 } else {
                     framerate = (int) (1000 / dtElapsed);
                 }
+            }
+
+            if (totalFrames > 0) {
+                double avgFrameTime = (double) totalSimulationTime / totalFrames;
+                System.out.println("Simulation ended.");
+                System.out.println("Total frames: " + totalFrames);
+                System.out.println("Average frame time: " + avgFrameTime + " ms");
+                System.out.println("Average FPS: " + (1000.0 / avgFrameTime));
             }
         }
     }

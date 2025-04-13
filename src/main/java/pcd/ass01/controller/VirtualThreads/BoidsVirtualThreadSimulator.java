@@ -20,18 +20,17 @@ public class BoidsVirtualThreadSimulator extends BoidsSimulator {
     private int framerate;
     private BoidsLatch boidsLatch;
     private final int boidsWorkers = Runtime.getRuntime().availableProcessors() - 1;
-    private final Thread[] workerThreads;
     private volatile boolean running = true;
     private volatile boolean stop = false;
 
-
+    private long totalSimulationTime = 0;
+    private int totalFrames = 0;
     private final Random random = new Random();
 
     public BoidsVirtualThreadSimulator(BoidsModel model) {
         super(model);
         this.model = model;
         view = Optional.empty();
-        workerThreads = new Thread[boidsWorkers];
     }
 
     public void attachView(BoidsView view) {
@@ -54,30 +53,25 @@ public class BoidsVirtualThreadSimulator extends BoidsSimulator {
             int end = Math.min(start + batchSize, boids.size());
             List<Boid> batch = boids.subList(start, end);
 
-            // Assign colors to boids
             batch.forEach(boid -> boid.setColor(color));
 
-            // Start a virtual thread for each worker
             Thread.ofVirtual().start(() -> {
                 try {
                     while (!stop) {
                         isPaused();
-
-                        // Update velocities
                         for (Boid boid : List.copyOf(batch)) {
                             boid.updateVelocity(model);
                         }
 
-                        boidsLatch.countDown(); // Let the main thread know velocities have been updated
-                        boidsLatch.await(); // Wait for all workers to reach this point
+                        boidsLatch.countDown();
+                        boidsLatch.await();
 
-                        // Update positions
                         for (Boid boid : List.copyOf(batch)) {
                             boid.updatePos(model);
                         }
 
-                        boidsLatch.countDown(); // Indicate that position updates are done
-                        boidsLatch.await(); // Wait for all workers to reach this point
+                        boidsLatch.countDown();
+                        boidsLatch.await();
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -108,7 +102,8 @@ public class BoidsVirtualThreadSimulator extends BoidsSimulator {
                 var t1 = System.currentTimeMillis();
                 var dtElapsed = t1 - t0;
                 var frameRatePeriod = 1000 / FRAMERATE;
-
+                totalSimulationTime += dtElapsed;
+                totalFrames++;
                 if (dtElapsed < frameRatePeriod) {
                     try {
                         Thread.sleep(frameRatePeriod - dtElapsed);
@@ -119,6 +114,14 @@ public class BoidsVirtualThreadSimulator extends BoidsSimulator {
                     framerate = FRAMERATE;
                 } else {
                     framerate = (int) (1000 / dtElapsed);
+                }
+
+                if (totalFrames > 0) {
+                    double avgFrameTime = (double) totalSimulationTime / totalFrames;
+                    System.out.println("Simulation ended.");
+                    System.out.println("Total frames: " + totalFrames);
+                    System.out.println("Average frame time: " + avgFrameTime + " ms");
+                    System.out.println("Average FPS: " + (1000.0 / avgFrameTime));
                 }
             }
         }
